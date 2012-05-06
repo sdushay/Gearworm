@@ -1,5 +1,5 @@
 from kivy.app import App
-from random import random
+from random import random, randint
 from kivy.uix.widget import Widget
 from kivy.graphics import Color, Line
 import math
@@ -36,6 +36,7 @@ class SwipeWidget(Widget):
 class ChipApp(App):
 	def build(self):
 		swipeW = SwipeWidget()
+		Snake()
 		return swipeW
 
 
@@ -57,7 +58,7 @@ class Snake(Widget):
 		length = 3
 		snake = []
 		for i in range(0,2):
-			snake[i] = gear()
+			snake.append(gear())
 		
 	def cleave(self):
 		for l in range(0, length-2):
