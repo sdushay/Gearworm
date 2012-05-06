@@ -37,6 +37,35 @@ class ChipApp(App):
 	def build(self):
 		swipeW = SwipeWidget()
 		return swipeW
+
+
+# '''
+
+class gear(Widget):
+	def __init__(self):
+		images = ["gearblue.png", "gearred.png", "gearyellow.png", "geargreen.png", "gearpink.png", "gearblue.png"]
+		chooser = randint(0,5)
+		self.image = images[chooser]
+		colors = ["blue", "red", "yellow", "green", "pink", "blue"]
+		self.color = colors[chooser]
+
+		
+			
+
+class Snake(Widget):
+	def __init__(self):
+		length = 3
+		snake = []
+		for i in range(0,2):
+			snake[i] = gear()
+		
+	def cleave(self):
+		for l in range(0, length-2):
+			if snake[l].color == snake[l+1].color and snake[l+1].color == snake[l+2].color:
+				snake.remove(l, l+1, l+2)
+
+# '''
+
 		
 if __name__ == '__main__':
 	ChipApp().run()
