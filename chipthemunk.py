@@ -24,12 +24,16 @@ class SwipeWidget(Widget):
 			angle = 180 / 3.14 * math.atan2(diffY, diffX)
 			print angle
 			if angle < 45 and angle > -45:
+				swpdir = "right"
 				print "right"	
 			elif angle < -45 and angle > -135:
+				swpdir = "down"
 				print "down"
 			elif angle < -135 or angle > 135:
+				swpdir = "left"
 				print "left"
 			else:
+				swpdir = "up"
 				print "up"
 			
 
@@ -43,23 +47,51 @@ class ChipApp(App):
 # '''
 
 class gear(Widget):
-	def __init__(self):
+	def __init__(self, attached):
 		images = ["gearblue.png", "gearred.png", "gearyellow.png", "geargreen.png", "gearpink.png", "gearblue.png"]
 		chooser = randint(0,5)
 		self.image = images[chooser]
 		colors = ["blue", "red", "yellow", "green", "pink", "blue"]
 		self.color = colors[chooser]
+		self.lifespan = randint(3,6)
+		self.attached = attached
 
 		
 			
 
 class Snake(Widget):
 	def __init__(self):
-		length = 3
-		snake = []
-		for i in range(0,2):
-			snake.append(gear())
+		self.images = ["head.png", "tail.png"]
+		self.length = 3
+		self.speed = (0, -1)
 		
+		# head maintains the position of the head
+		self.head = (200, 200)
+		self.body = []
+		for i in range(0,2):
+			snake.append(gear(True))
+	
+		# Direction Queue
+		
+		DQ = []
+	
+		# Event Handling
+		
+		if swpdir == "up":
+			DQ.append(("up", head))
+			speed = (0, -1)
+		if swpdir == "left":
+			DQ.append(("left", head))
+			speed = (-1, 0)
+		if swpdir == "down":
+			DQ.append(("down", head))
+			speed = (0, 1)
+		if swpdir == "right":
+			DQ.append(("right", head))
+			speed = (1, 0)
+		
+	
+
 	def cleave(self):
 		for l in range(0, length-2):
 			if snake[l].color == snake[l+1].color and snake[l+1].color == snake[l+2].color:
