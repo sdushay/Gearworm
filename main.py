@@ -37,10 +37,10 @@ class Gear(Widget):
 	attached = False
 	images = ["gearblue.png", "gearred.png", "gearyellow.png", "geargreen.png", "gearpink.png"]
 	def setup(self):
-		
+		self.color = randint(1, 5)
 		self.pos = (randint(1, Window.size[0]), randint(1, Window.size[1]))
 		with self.canvas:
-			self.image = Rectangle(size=(30,30), pos=self.pos, source='
+			self.image = Rectangle(size=(30,30), pos=self.pos, source=images[color])
 				
 class Snake(Widget):
 	gears = []
@@ -70,7 +70,10 @@ class SnookGame(Widget):
 		self.add_widget(self.snake)
 		self.snake.setup()
 		Clock.schedule_interval(self.snake.update, 1.0/60.0)
-		
+	
+	def create_gear(self, dt):
+		pass
+	
 	def on_touch_down(self, touch):
 		with self.canvas:
 			Color(random(), 1, 1, mode='hsv')
