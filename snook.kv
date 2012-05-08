@@ -1,5 +1,15 @@
 #:kivy 1.0.9
 
+<SnookGame>:
+	Label:
+		text: str(root.score)
+		halign: 'right'
+		valign: 'bottom'
+		pos: root.width - 100, root.height - 45
+		color: 1, 1, 1, 1
+		font_size: 30
+		text_size: self.size
+
 <SnookMenu>:
 	canvas:
 		Color:

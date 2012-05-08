@@ -22,24 +22,54 @@ class Music(Widget):
 			self.sound.play()
 			self.sound.on_stop = self.sound.play
 				
+'''class gear(Widget):
+	def __init__(self, attached):
+		images = ["gearblue.png", "gearred.png", "gearyellow.png", "geargreen.png", "gearpink.png", "gearblue.png"]
+		chooser = randint(0,5)
+		self.image = images[chooser]
+		colors = ["blue", "red", "yellow", "green", "pink", "blue"]
+		self.color = colors[chooser]
+		self.lifespan = randint(3,6)
+		self.attached = attached
+		self.pos				
+'''
+class Gear(Widget):
+	attached = False
+	images = ["gearblue.png", "gearred.png", "gearyellow.png", "geargreen.png", "gearpink.png"]
+	def setup(self):
+		
+		self.pos = (randint(1, Window.size[0]), randint(1, Window.size[1]))
+		with self.canvas:
+			self.image = Rectangle(size=(30,30), pos=self.pos, source='
+				
 class Snake(Widget):
 	gears = []
+	dir = "none"
 	def setup(self):
 		self.pos = (Window.center[0], Window.center[1])
-		self.velocity = 2
+		self.velocity = 5
 		with self.canvas:
-			self.rect = Rectangle(size=(30,30), pos=self.pos, source='assets/head.png')
+			self.head = Rectangle(size=(30,30), pos=self.pos, source='assets/head.png')
 		
-	def update(self, dir, *largs):
-		pass
+	def update(self, dt):
+		if self.dir == "up":
+			self.head.pos = (self.head.pos[0], self.head.pos[1] + self.velocity)
+		elif self.dir == "down":
+			self.head.pos = (self.head.pos[0], self.head.pos[1] - self.velocity)
+		elif self.dir == "left":
+			self.head.pos = (self.head.pos[0] - self.velocity, self.head.pos[1])
+		elif self.dir == "right":
+			self.head.pos = (self.head.pos[0] + self.velocity, self.head.pos[1])
+		
 	
 class SnookGame(Widget):
 	snake = Snake()
 	dir = "none"
+	score = 0
 	def start(self):
 		self.add_widget(self.snake)
 		self.snake.setup()
-		Clock.schedule_interval(partial(self.snake.update, self.dir), 1.0/60.0)
+		Clock.schedule_interval(self.snake.update, 1.0/60.0)
 		
 	def on_touch_down(self, touch):
 		with self.canvas:
@@ -54,13 +84,13 @@ class SnookGame(Widget):
 		if diffX != 0 or diffY != 0:
 			angle = 180 / 3.14 * math.atan2(diffY, diffX)
 			if angle < 45 and angle > -45:
-				self.dir = "right"
+				self.snake.dir = "right"
 			elif angle < -45 and angle > -135:
-				self.dir = "down"
+				self.snake.dir = "down"
 			elif angle < -135 or angle > 135:
-				self.dir = "left"
+				self.snake.dir = "left"
 			else:
-				self.dir = "up"
+				self.snake.dir = "up"
 		
 				
 class SnookMenu(Widget):
@@ -96,16 +126,7 @@ class SnookApp(App):
 
 '''
 
-class gear(Widget):
-	def __init__(self, attached):
-		images = ["gearblue.png", "gearred.png", "gearyellow.png", "geargreen.png", "gearpink.png", "gearblue.png"]
-		chooser = randint(0,5)
-		self.image = images[chooser]
-		colors = ["blue", "red", "yellow", "green", "pink", "blue"]
-		self.color = colors[chooser]
-		self.lifespan = randint(3,6)
-		self.attached = attached
-		self.pos
+
 		
 			
 
