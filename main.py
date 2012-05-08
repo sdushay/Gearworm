@@ -1,47 +1,97 @@
 from kivy.app import App
 from random import random, randint
 from kivy.uix.widget import Widget
-from kivy.graphics import Color, Line
+from kivy.graphics import Color, Line, Rectangle
+from kivy.core.window import Window
+from kivy.clock import Clock
+from math import sin
+from kivy.factory import Factory
+from kivy.lang import Builder
+from kivy.uix.button import Button
+from kivy.core.audio import SoundLoader
+from functools import partial
 import math
 
-class SwipeWidget(Widget):
+class Music(Widget):
+	sound = None
+
+	def start(self):
+		if self.sound is None:
+			self.sound = SoundLoader.load("music.ogg")
+			self.sound.volume = 0.8
+			self.sound.play()
+			self.sound.on_stop = self.sound.play
+				
+class Snake(Widget):
+	gears = []
+	def setup(self):
+		self.pos = (Window.center[0], Window.center[1])
+		self.velocity = 2
+		with self.canvas:
+			self.rect = Rectangle(size=(30,30), pos=self.pos, source='assets/head.png')
+		
+	def update(self, dir, *largs):
+		pass
+	
+class SnookGame(Widget):
+	snake = Snake()
+	dir = "none"
+	def start(self):
+		self.add_widget(self.snake)
+		self.snake.setup()
+		Clock.schedule_interval(partial(self.snake.update, self.dir), 1.0/60.0)
+		
 	def on_touch_down(self, touch):
 		with self.canvas:
 			Color(random(), 1, 1, mode='hsv')
 			d = 30.
 			touch.ud['origX'] = touch.x
 			touch.ud['origY'] = touch.y
-			touch.ud['line'] = Line(points=(touch.x, touch.y))
-			
-	def on_touch_move(self, touch):
-		touch.ud['line'].points += [touch.x, touch.y]
 		
 	def on_touch_up(self, touch):
-		self.canvas.clear()
 		diffX = touch.x - touch.ud['origX']
 		diffY = touch.y - touch.ud['origY']
 		if diffX != 0 or diffY != 0:
 			angle = 180 / 3.14 * math.atan2(diffY, diffX)
-			print angle
 			if angle < 45 and angle > -45:
-				swpdir = "right"
-				print "right"	
+				self.dir = "right"
 			elif angle < -45 and angle > -135:
-				swpdir = "down"
-				print "down"
+				self.dir = "down"
 			elif angle < -135 or angle > 135:
-				swpdir = "left"
-				print "left"
+				self.dir = "left"
 			else:
-				swpdir = "up"
-				print "up"
-			
+				self.dir = "up"
+		
+				
+class SnookMenu(Widget):
+	pass
+		
+class SnookRoot(Widget):
+	STATE_MENU = 0
+	STATE_PLAY = 1
+	STATE_LOSE = 2
+	
+	def start(self):
+		self.state = SnookRoot.STATE_MENU
+		self.menu = SnookMenu()
+		self.menu.size = Window.size
+		self.add_widget(self.menu)
+		
+	def start_game(self):
+		self.state = SnookRoot.STATE_PLAY
+		self.remove_widget(self.menu)
+		print "here"
+		self.game = SnookGame()
+		self.game.start()
+		self.add_widget (self.game)
 
-class ChipApp(App):
+class SnookApp(App):
+	icon = 'assets/icon.png'
 	def build(self):
-		swipeW = SwipeWidget()
-		#Snake()
-		return swipeW
+		root = SnookRoot()
+		root.size = Window.size
+		root.start()
+		return root
 
 
 '''
@@ -105,4 +155,4 @@ class Snake(Widget):
 
 		
 if __name__ == '__main__':
-	ChipApp().run()
+	SnookApp().run()

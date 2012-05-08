@@ -1,0 +1,22 @@
+#:kivy 1.0.9
+
+<SnookMenu>:
+	canvas:
+		Color:
+			rgb: 1, 1, 1
+		Rectangle:
+			size: root.size
+			source: 'assets/background.png'
+	Button:
+		width: 250
+		center_x: root.size[0] / 2
+		center_y: root.size[1] / 2
+		text: 'Start Game'
+		on_release: root.parent.start_game()
+		background_color: 0.2, 0.2, 0.2, 1
+		font_size: 30
+	
+	
+		
+<SnookRoot>:
+	
