@@ -24,6 +24,13 @@ class Music(Widget):
 			self.sound.play()
 			self.sound.on_stop = self.sound.play
 
+class Screw(Widget):
+	def setup(self):
+		self.size = (30,30)
+		self.pos = (randint(1, Window.size[0] - 50), randint(1, Window.size[1] - 50))
+		with self.canvas:
+			self.image = Rectangle(size=(30,30), pos=self.pos, source='assets/screw.png')
+			
 class Gear(Widget):
 	attached = False
 	images = ["assets/gearblue.png", "assets/gearred.png", "assets/gearyellow.png", "assets/geargreen.png", "assets/gearpink.png"]
@@ -39,13 +46,23 @@ class Snake(Widget):
 	dir = "none"
 	positions = []
 	def setup(self):
+		self.positions = []
+		self.gears = []
+		self.dir = "none"
 		self.pos = (Window.center[0], Window.center[1])
 		self.velocity = 30
 		self.size= (30, 30)
 		self.positions.append(self.pos)
 		with self.canvas:
 			self.head = Rectangle(size=(30,30), pos=self.pos, source='assets/head.png')
-			
+	
+	def reset(self):
+		self.positions = []
+		self.gears = []
+		self.dir = "none"
+		self.positions.append(self.pos)
+		self.head.pos = (Window.center[0], Window.center[1])
+	
 	def update(self, dt):
 		pos = self.head.pos
 		if self.dir == "up":
@@ -66,18 +83,24 @@ class Snake(Widget):
 			self.gears[i].pos = self.positions[i]
 			self.gears[i].image.pos = self.gears[i].pos
 		self.pos = self.head.pos
+		end = False
 		for g in self.gears:
 			if g.collide_widget(self):
-				self.parent.parent.end_game()
+				end = True
 		if self.pos[0] < 0 or self.pos[0] + 30 > Window.size[0] or self.pos[1] < 0 or self.pos[1] + 30 > Window.size[1]:
+			end = True
+		if end:
 			self.parent.parent.end_game()
 		
 class SnookGame(Widget):
-	snake = Snake()
-	dir = "none"
 	score = NumericProperty(0)
 	allgears = []
+	dir = "none"
+	snake = Snake()
+	screws = []
 	def start(self):
+		self.dir = "none"
+		self.score = 0
 		self.add_widget(self.snake)
 		gear = Gear()
 		gear.setup()
@@ -87,18 +110,80 @@ class SnookGame(Widget):
 		Clock.schedule_interval(self.snake.update, .1)
 		Clock.schedule_interval(self.create_gear, 2)
 		Clock.schedule_interval(self.check_collisions, 1.0 / 60.0)
-		
+		Clock.schedule_interval(self.create_screw, 7)
+	
+	def restart_game(self):
+		for g in self.allgears:
+			self.remove_widget(g)
+		for g in self.snake.gears:
+			self.snake.remove_widget(g)
+		for s in self.screws:
+			self.remove_widget(s)
+		self.allgears = []
+		self.screws = []
+		self.snake.reset()
+		gear = Gear()
+		gear.setup()
+		self.allgears.append(gear)
+		self.add_widget(gear)
+		self.score = 0
+		Clock.schedule_interval(self.snake.update, .1)
+		Clock.schedule_interval(self.create_gear, 2)
+		Clock.schedule_interval(self.check_collisions, 1.0 / 60.0)
+		Clock.schedule_interval(self.create_screw, 7)
+	
 	def check_collisions(self, dt):
 		for gear in self.allgears:
 			if gear.collide_widget(self.snake):
 				self.remove_widget(gear)
 				self.allgears.remove(gear)
-				self.snake.gears.append(gear)
-				self.snake.add_widget(gear)
-				pos = self.snake.positions[len(self.snake.positions) - 1]
-				self.snake.positions.append(pos)
-				self.score += 10
-		
+				if len(self.snake.gears) > 1:
+					if gear.colornum == self.snake.gears[len(self.snake.gears) - 1].colornum and gear.colornum == self.snake.gears[len(self.snake.gears) - 2].colornum:
+						print "3 of a kind"
+						self.snake.remove_widget(self.snake.gears[len(self.snake.gears) - 1])
+						self.snake.remove_widget(self.snake.gears[len(self.snake.gears) - 2])
+						self.snake.gears.pop(len(self.snake.gears) - 1)
+						self.snake.gears.pop(len(self.snake.gears) - 1)
+						self.snake.positions.pop(len(self.snake.positions) - 1)
+						self.snake.positions.pop(len(self.snake.positions) - 1)
+						self.score += 50
+					else:
+						self.snake.gears.append(gear)
+						self.snake.add_widget(gear)
+						pos = self.snake.positions[len(self.snake.positions) - 1]
+						self.snake.positions.append(pos)
+						self.score += 10
+				else:
+					self.snake.gears.append(gear)
+					self.snake.add_widget(gear)
+					pos = self.snake.positions[len(self.snake.positions) - 1]
+					self.snake.positions.append(pos)
+					self.score += 10
+		for screw in self.screws:
+			if screw.collide_widget(self.snake):
+				self.parent.end_game()
+
+	def create_screw(self, dt):
+		screw = Screw()
+		screw.setup()
+		found = False
+		for g in self.allgears:
+			if screw.collide_widget(g):
+				found = True
+		for sg in self.snake.gears:
+			if screw.collide_widget(sg):
+				found = True
+		for s in self.screws:
+			if screw.collide_widget(s):
+				found = True
+		if screw.collide_widget(self.snake):
+			found = True
+		if not found:
+			self.add_widget(screw)
+			self.screws.append(screw)
+		else:
+			self.create_screw(1.0/60.0)
+	
 	def create_gear(self, dt):
 		gear = Gear()
 		gear.setup()
@@ -108,6 +193,9 @@ class SnookGame(Widget):
 				found = True
 		for sg in self.snake.gears:
 			if gear.collide_widget(sg):
+				found = True
+		for s in self.screws:
+			if gear.collide_widget(s):
 				found = True
 		if gear.collide_widget(self.snake):
 			found = True
@@ -140,6 +228,11 @@ class SnookGame(Widget):
 				
 class SnookMenu(Widget):
 	pass
+	
+class SnookRestartMenu(Widget):
+	score = NumericProperty(0)
+	def setup(self, score):
+		self.score = score
 		
 class SnookRoot(Widget):
 	STATE_MENU = 0
@@ -158,14 +251,23 @@ class SnookRoot(Widget):
 		self.game = SnookGame()
 		self.game.start()
 		self.add_widget (self.game)
-
+		
+	def restart_game(self):
+		self.game.restart_game()
+		self.remove_widget(self.lose)
+		self.add_widget(self.game)
+		
 	def end_game(self):
 		Clock.unschedule(self.game.snake.update)
 		Clock.unschedule(self.game.create_gear)
 		Clock.unschedule(self.game.check_collisions)
-		with self.canvas:
-			label = Label(text='Game Over', font_size=30)
-			label.pos = (Window.center[0] - label.size[0] / 2, Window.center[1])
+		Clock.unschedule(self.game.create_screw)
+		self.state = SnookRoot.STATE_LOSE
+		self.remove_widget(self.game)
+		self.lose = SnookRestartMenu()
+		self.lose.size = Window.size
+		self.lose.setup(self.game.score)
+		self.add_widget(self.lose)
 			
 class SnookApp(App):
 	icon = 'assets/icon.png'
@@ -176,56 +278,6 @@ class SnookApp(App):
 		return root
 
 Factory.register("SnookGame", SnookGame)
-'''
-
-
-		
-			
-
-class Snake(Widget):
-	def __init__(self):
-		self.images = ["head.png", "tail.png"]
-		self.length = 3
-		self.speed = (0, -1)
-		
-		# head maintains the position of the head
-		self.head = (200, 200)
-		self.body = []
-		for i in range(0,2):
-			snake.append(gear(True))
-	
-	def update(self, screen): 
-		# Direction Queue
-		
-		DQ = []
-	
-		# Event Handling
-		
-		if swpdir == "up":
-			DQ.append(("up", head))
-			speed = (0, -1)
-		if swpdir == "left":
-			DQ.append(("left", head))
-			speed = (-1, 0)
-		if swpdir == "down":
-			DQ.append(("down", head))
-			speed = (0, 1)
-		if swpdir == "right":
-			DQ.append(("right", head))
-			speed = (1, 0)
-		
-		# moving the snake
-		for g in self.body:
-			if gear.pos
-			
-
-	def cleave(self):
-		for l in range(0, length-2):
-			if snake[l].color == snake[l+1].color and snake[l+1].color == snake[l+2].color:
-				snake.remove(l, l+1, l+2)
-
- '''
-
 		
 if __name__ == '__main__':
 	SnookApp().run()

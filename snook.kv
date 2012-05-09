@@ -10,6 +10,40 @@
 		font_size: 30
 		text_size: self.size
 
+<SnookRestartMenu>:
+	canvas:
+		Color:
+			rgb: 1, 1, 1
+		Rectangle:
+			size: root.size
+			source: 'assets/background.png'
+	Label:
+		text: "Game Over"
+		width: 250
+		halign: 'right'
+		valign: 'bottom'
+		pos: root.size[0] / 2 - 150, root.size[1] / 2 + 75
+		color: 1, 1, 1, 1
+		font_size: 30
+		text_size: self.size
+	Label:
+		text: "Score: " + str(root.score)
+		width: 250
+		halign: 'right'
+		valign: 'bottom'
+		pos: root.size[0] / 2 - 150, root.size[1] / 2
+		color: 1, 1, 1, 1
+		font_size: 30
+		text_size: self.size
+	Button:
+		width: 250
+		center_x: root.size[0] / 2
+		center_y: root.size[1] / 2 - 100
+		text: 'Restart Game'
+		on_release: root.parent.restart_game()
+		background_color: 0.2, 0.2, 0.2, 1
+		font_size: 30
+		
 <SnookMenu>:
 	canvas:
 		Color:
