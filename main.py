@@ -26,6 +26,7 @@ class Music(Widget):
 
 class Screw(Widget):
 	def setup(self):
+		self.time = 0
 		self.size = (30,30)
 		self.pos = (randint(1, Window.size[0] - 50), randint(1, Window.size[1] - 50))
 		with self.canvas:
@@ -35,6 +36,7 @@ class Gear(Widget):
 	attached = False
 	images = ["assets/gearblue.png", "assets/gearred.png", "assets/gearyellow.png", "assets/geargreen.png", "assets/gearpink.png"]
 	def setup(self):
+		self.time = 0
 		self.colornum = randint(0, 4)
 		self.size = (30, 30)
 		self.pos = (randint(1, Window.size[0] - 50), randint(1, Window.size[1] - 50))
@@ -108,9 +110,10 @@ class SnookGame(Widget):
 		self.add_widget(gear)
 		self.snake.setup()
 		Clock.schedule_interval(self.snake.update, .1)
-		Clock.schedule_interval(self.create_gear, 2)
+		Clock.schedule_interval(self.create_gear, 1)
 		Clock.schedule_interval(self.check_collisions, 1.0 / 60.0)
 		Clock.schedule_interval(self.create_screw, 7)
+		Clock.schedule_interval(self.check_fade, 1.0/60.0)
 	
 	def restart_game(self):
 		for g in self.allgears:
@@ -128,9 +131,10 @@ class SnookGame(Widget):
 		self.add_widget(gear)
 		self.score = 0
 		Clock.schedule_interval(self.snake.update, .1)
-		Clock.schedule_interval(self.create_gear, 2)
+		Clock.schedule_interval(self.create_gear, 1)
 		Clock.schedule_interval(self.check_collisions, 1.0 / 60.0)
 		Clock.schedule_interval(self.create_screw, 7)
+		Clock.schedule_interval(self.check_fade, 1.0/60.0)
 	
 	def check_collisions(self, dt):
 		for gear in self.allgears:
@@ -139,7 +143,6 @@ class SnookGame(Widget):
 				self.allgears.remove(gear)
 				if len(self.snake.gears) > 1:
 					if gear.colornum == self.snake.gears[len(self.snake.gears) - 1].colornum and gear.colornum == self.snake.gears[len(self.snake.gears) - 2].colornum:
-						print "3 of a kind"
 						self.snake.remove_widget(self.snake.gears[len(self.snake.gears) - 1])
 						self.snake.remove_widget(self.snake.gears[len(self.snake.gears) - 2])
 						self.snake.gears.pop(len(self.snake.gears) - 1)
@@ -163,6 +166,14 @@ class SnookGame(Widget):
 			if screw.collide_widget(self.snake):
 				self.parent.end_game()
 
+	def check_fade(self, dt):
+		for g in self.allgears:
+			g.time += dt
+			if g.time > 5:
+				self.remove_widget(g)
+				self.allgears.remove(g)
+			
+				
 	def create_screw(self, dt):
 		screw = Screw()
 		screw.setup()
@@ -262,6 +273,7 @@ class SnookRoot(Widget):
 		Clock.unschedule(self.game.create_gear)
 		Clock.unschedule(self.game.check_collisions)
 		Clock.unschedule(self.game.create_screw)
+		Clock.unschedule(self.game.check_fade)
 		self.state = SnookRoot.STATE_LOSE
 		self.remove_widget(self.game)
 		self.lose = SnookRestartMenu()
