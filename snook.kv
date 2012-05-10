@@ -18,6 +18,66 @@
 		color: 1, 1, 1, 1
 		font_size: 30
 
+<SnookSettingMenu>:
+	canvas:
+		Color:
+			rgb: 1, 1, 1
+		Rectangle:
+			size: root.size
+			source: 'assets/background.png'
+	Button:
+		width: 150
+		text: 'Easy'
+		pos: root.width / 3 - 200, root.height / 2
+		color: 1, 1, 1, 1
+		font_size: 30
+		on_release: root.parent.set_diff("easy")
+	Button:
+		width: 150
+		text: 'Medium'
+		pos: root.width / 3 * 2 - 200, root.height / 2
+		color: 1, 1, 1, 1
+		font_size: 30
+		on_release: root.parent.set_diff("med")
+	Button:
+		width: 150
+		text: 'hard'
+		pos: root.width - 200, root.height / 2
+		color: 1, 1, 1, 1
+		font_size: 30
+		on_release: root.parent.set_diff("hard")
+	Button:
+		width: 250
+		text: 'Music: ' + str(root.toggle)
+		center_x: root.size[0] / 2
+		center_y: root.size[1] / 2 - 75
+		color: 1, 1, 1, 1
+		font_size: 30
+		on_release: root.parent.toggle_music()
+	Button:
+		width: 250
+		text: 'Back'
+		center_x: root.size[0] / 2
+		center_y: root.size[1] / 2 - 200
+		color: 1, 1, 1, 1
+		font_size: 30
+		on_release: root.parent.back_to_main()
+		
+<SnookHelpMenu>:
+	canvas:
+		Color:
+			rgb: 1, 1, 1
+		Rectangle:
+			size: root.size
+			source: 'assets/helpScreen.png'
+	Button:
+		width: 200
+		text: 'Back'
+		pos: 5, 5
+		color: 1, 1, 1, 1
+		font_size: 30
+		on_release: root.parent.back_to_main()
+		
 <SnookRestartMenu>:
 	canvas:
 		Color:

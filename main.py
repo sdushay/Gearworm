@@ -17,13 +17,16 @@ import math
 
 class Music(Widget):
 	sound = None
-
 	def start(self):
 		if self.sound is None:
 			self.sound = SoundLoader.load("music.ogg")
 			self.sound.volume = 0.8
 			self.sound.play()
 			self.sound.on_stop = self.sound.play
+		else:
+			self.sound.volume = 0.8
+	def stop(self):
+		self.sound.volume = 0
 
 class Screw(Widget):
 	def setup(self):
@@ -110,10 +113,12 @@ class SnookGame(Widget):
 		self.allgears.append(gear)
 		self.add_widget(gear)
 		self.snake.setup()
-		Clock.schedule_interval(self.snake.update, .1)
+		print speed_time
+		print screw_time
+		Clock.schedule_interval(self.snake.update, speed_time)
 		Clock.schedule_interval(self.create_gear, 1)
 		Clock.schedule_interval(self.check_collisions, 1.0 / 60.0)
-		Clock.schedule_interval(self.create_screw, 7)
+		Clock.schedule_interval(self.create_screw, screw_time)
 		Clock.schedule_interval(self.check_fade, 1.0/60.0)
 	
 	def restart_game(self):
@@ -131,10 +136,10 @@ class SnookGame(Widget):
 		self.allgears.append(gear)
 		self.add_widget(gear)
 		self.score = 0
-		Clock.schedule_interval(self.snake.update, .1)
+		Clock.schedule_interval(self.snake.update, speed_time)
 		Clock.schedule_interval(self.create_gear, 1)
 		Clock.schedule_interval(self.check_collisions, 1.0 / 60.0)
-		Clock.schedule_interval(self.create_screw, 7)
+		Clock.schedule_interval(self.create_screw, screw_time)
 		Clock.schedule_interval(self.check_fade, 1.0/60.0)
 	
 	def check_collisions(self, dt):
@@ -170,7 +175,7 @@ class SnookGame(Widget):
 	def check_fade(self, dt):
 		for g in self.allgears:
 			g.time += dt
-			if g.time > 5:
+			if g.time > fade_time:
 				self.remove_widget(g)
 				self.allgears.remove(g)
 			
@@ -201,7 +206,7 @@ class SnookGame(Widget):
 				toRemove = self.screws.pop()
 				self.remove_widget(toRemove)
 		else:
-			self.create_screw(1.0/60.0)
+			self.create_screw(screw_time)
 		
 	def create_gear(self, dt):
 		gear = Gear()
@@ -222,7 +227,7 @@ class SnookGame(Widget):
 			self.add_widget(gear)
 			self.allgears.append(gear)
 		else:
-			self.create_gear(1.0/60.0)
+			self.create_gear(1)
 		
 	
 	def on_touch_down(self, touch):
@@ -259,12 +264,20 @@ class SnookRestartMenu(Widget):
 		
 class SnookHelpMenu(Widget):
 	pass
+	
+class SnookSettingMenu(Widget):
+	toggle = "On"
 		
 class SnookRoot(Widget):
+	global fade_time, speed_time, screw_time
+	fade_time = 5
+	screw_time = 8
+	speed_time = .1
 	STATE_MENU = 0
 	STATE_PLAY = 1
 	STATE_LOSE = 2
 	STATE_HELP = 3
+	STATE_SETTINGS = 4
 	help = Widget()
 	menu_visited = 0
 	
@@ -273,6 +286,8 @@ class SnookRoot(Widget):
 		self.menu = SnookMenu()
 		self.menu.size = Window.size
 		self.add_widget(self.menu)
+		self.music = Music()
+		self.music.start()
 		
 	def start_game(self):
 		self.state = SnookRoot.STATE_PLAY
@@ -285,16 +300,34 @@ class SnookRoot(Widget):
 			self.game.restart_game()
 		self.add_widget (self.game)
 		self.menu_visited += 1
-	
+		
+	def back_to_main(self):
+		if self.state == SnookRoot.STATE_HELP:
+			self.remove_widget(self.help)
+		else:
+			self.remove_widget(self.settings)
+		self.state = SnookRoot.STATE_MENU
+		self.add_widget(self.menu)
+		
 	def restart_main(self):
 		self.remove_widget(self.lose)
 		self.state = SnookRoot.STATE_MENU
 		self.menu.size = Window.size
 		self.add_widget(self.menu)
-		
-	#def get_help(self):
-	#	self.state = SnookeRoot.STATE_HELP
-	#	self.help = SnookHelpMenu()
+	
+	def get_settings(self):
+		self.state = SnookRoot.STATE_SETTINGS
+		self.settings = SnookSettingMenu()
+		self.settings.size = Window.size
+		self.remove_widget(self.menu)
+		self.add_widget(self.settings)
+	
+	def get_help(self):
+		self.state = SnookRoot.STATE_HELP
+		self.help = SnookHelpMenu()
+		self.help.size = Window.size
+		self.remove_widget(self.menu)
+		self.add_widget(self.help)
 		
 	def restart_game(self):
 		if self.state == SnookRoot.STATE_LOSE:
@@ -316,6 +349,23 @@ class SnookRoot(Widget):
 		self.lose.size = Window.size
 		self.lose.setup(self.game.score)
 		self.add_widget(self.lose)
+		
+	def set_diff(self, diff):
+		global fade_time, screw_time, speed_time
+		if diff == "easy":
+			fade_time = 10
+			screw_time = 16
+			speed_time = .2
+		elif diff == "med":
+			fade_time = 5
+			screw_time = 8
+			speed_time = .1
+		else:
+			fade_time = 3
+			screw_time = 5
+			speed_time = .05
+	
+	def
 			
 class SnookApp(App):
 	icon = 'assets/icon.png'
