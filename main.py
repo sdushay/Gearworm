@@ -196,9 +196,11 @@ class SnookGame(Widget):
 			self.add_widget(screw)
 			self.screws.append(screw)
 			if screw.pos[0] < self.snake.head.pos[0] + 30 and screw.pos[0] > self.snake.head.pos[0] - 30:
-				self.screws.pop()
+				toRemove = self.screws.pop()
+				self.remove_widget(toRemove)
 			if screw.pos[1] < self.snake.head.pos[1] + 30 and screw.pos[1] > self.snake.head.pos[1] - 30:
-				self.screws.pop()
+				toRemove = self.screws.pop()
+				self.remove_widget(toRemove)
 		else:
 			self.create_screw(1.0/60.0)
 		
