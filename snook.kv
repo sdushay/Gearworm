@@ -1,6 +1,16 @@
 #:kivy 1.0.9
+#:import kivy kivy
+#:import win kivy.core.window
+
 
 <SnookGame>:
+	canvas:
+		Color:
+			rgb: 1, 1, 1
+		Rectangle:
+			size: root.size
+			source: 'assets/gameBackground.png'
+
 	Label:
 		text: str(root.score)
 		halign: 'right'

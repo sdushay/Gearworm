@@ -12,6 +12,7 @@ from kivy.core.audio import SoundLoader
 from functools import partial
 from kivy.properties import NumericProperty
 from kivy.uix.label import Label
+from kivy.animation import Animation
 import math
 
 class Music(Widget):
@@ -101,6 +102,7 @@ class SnookGame(Widget):
 	snake = Snake()
 	screws = []
 	def start(self):
+		
 		self.dir = "none"
 		self.score = 0
 		self.add_widget(self.snake)
@@ -177,6 +179,7 @@ class SnookGame(Widget):
 	def create_screw(self, dt):
 		screw = Screw()
 		screw.setup()
+					
 		found = False
 		for g in self.allgears:
 			if screw.collide_widget(g):
@@ -192,9 +195,17 @@ class SnookGame(Widget):
 		if not found:
 			self.add_widget(screw)
 			self.screws.append(screw)
+			if screw.pos[0] < self.snake.head.pos[0] + 30 and screw.pos[0] > self.snake.head.pos[0] - 30:
+				self.screws.pop()
+			if screw.pos[1] < self.snake.head.pos[1] + 30 and screw.pos[1] > self.snake.head.pos[1] - 30:
+				self.screws.pop()
 		else:
 			self.create_screw(1.0/60.0)
-	
+		if screw.pos[0] < self.snake.head.pos[0] + 30 and screw.pos[0] > self.snake.head.pos[0] - 30:
+			self.screws.remove(screw)
+		if screw.pos[1] < self.snake.head.pos[1] + 30 and screw.pos[1] > self.snake.head.pos[1] - 30:
+			self.screws.remove(screw)
+
 	def create_gear(self, dt):
 		gear = Gear()
 		gear.setup()
@@ -260,6 +271,7 @@ class SnookRoot(Widget):
 		self.state = SnookRoot.STATE_PLAY
 		self.remove_widget(self.menu)
 		self.game = SnookGame()
+		self.game.size = Window.size
 		self.game.start()
 		self.add_widget (self.game)
 		
