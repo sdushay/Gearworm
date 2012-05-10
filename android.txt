@@ -1,0 +1,3 @@
+title=Snook
+author=Russell Stern
+orientation = landscape, portrait

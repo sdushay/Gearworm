@@ -10,15 +10,13 @@
 		Rectangle:
 			size: root.size
 			source: 'assets/gameBackground.png'
-
 	Label:
-		text: str(root.score)
+		text: "Score: " + str(root.score)
 		halign: 'right'
 		valign: 'bottom'
-		pos: root.width - 100, root.height - 45
+		pos: root.width - 175, 5
 		color: 1, 1, 1, 1
 		font_size: 30
-		text_size: self.size
 
 <SnookRestartMenu>:
 	canvas:
@@ -32,7 +30,7 @@
 		width: 250
 		halign: 'right'
 		valign: 'bottom'
-		pos: root.size[0] / 2 - 150, root.size[1] / 2 + 75
+		pos: root.size[0] / 2 - 150, root.size[1] / 2 + 50
 		color: 1, 1, 1, 1
 		font_size: 30
 		text_size: self.size
@@ -53,6 +51,14 @@
 		on_release: root.parent.restart_game()
 		background_color: 0.2, 0.2, 0.2, 1
 		font_size: 30
+	Button:
+		width: 250
+		center_x: root.size[0] / 2
+		center_y: root.size[1] / 2 - 225
+		text: 'Main Menu'
+		on_release: root.parent.restart_main()
+		background_color: 0.2, 0.2, 0.2, 1
+		font_size: 30
 		
 <SnookMenu>:
 	canvas:
@@ -64,13 +70,28 @@
 	Button:
 		width: 250
 		center_x: root.size[0] / 2
-		center_y: root.size[1] / 2
+		center_y: root.size[1] / 2 + 50
 		text: 'Start Game'
 		on_release: root.parent.start_game()
+		background_color: 0.2, 0.2, 0.2, 1
+		font_size: 30
+	Button:
+		width: 250
+		center_x: root.size[0] / 2
+		center_y: root.size[1] / 2 - 75
+		text: 'Help'
+		on_release: root.parent.get_help()
+		background_color: 0.2, 0.2, 0.2, 1
+		font_size: 30
+	Button:
+		width: 250
+		center_x: root.size[0] / 2
+		center_y: root.size[1] / 2 - 200
+		text: 'Settings'
+		on_release: root.parent.get_settings()
 		background_color: 0.2, 0.2, 0.2, 1
 		font_size: 30
 	
 	
 		
 <SnookRoot>:
-	
