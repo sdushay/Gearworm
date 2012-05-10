@@ -228,27 +228,37 @@ class SnookGame(Widget):
 		if diffX != 0 or diffY != 0:
 			angle = 180 / 3.14 * math.atan2(diffY, diffX)
 			if angle < 45 and angle > -45:
-				self.snake.dir = "right"
+				if not self.snake.dir == "left":
+					self.snake.dir = "right"
 			elif angle < -45 and angle > -135:
-				self.snake.dir = "down"
+				if not self.snake.dir == "up":
+					self.snake.dir = "down"
 			elif angle < -135 or angle > 135:
-				self.snake.dir = "left"
+				if not self.snake.dir == "right":
+					self.snake.dir = "left"
 			else:
-				self.snake.dir = "up"
+				if not self.snake.dir == "down":
+					self.snake.dir = "up"
 		
 				
 class SnookMenu(Widget):
-	pass
+	times_called = 0
 	
 class SnookRestartMenu(Widget):
 	score = NumericProperty(0)
 	def setup(self, score):
 		self.score = score
 		
+class SnookHelpMenu(Widget):
+	pass
+		
 class SnookRoot(Widget):
 	STATE_MENU = 0
 	STATE_PLAY = 1
 	STATE_LOSE = 2
+	STATE_HELP = 3
+	help = Widget()
+	menu_visited = 0
 	
 	def start(self):
 		self.state = SnookRoot.STATE_MENU
@@ -259,13 +269,31 @@ class SnookRoot(Widget):
 	def start_game(self):
 		self.state = SnookRoot.STATE_PLAY
 		self.remove_widget(self.menu)
-		self.game = SnookGame()
-		self.game.start()
+		if self.menu_visited == 0:
+			self.game = SnookGame()
+			self.game.size = Window.size
+			self.game.start()
+		else:
+			self.game.restart_game()
 		self.add_widget (self.game)
+		self.menu_visited += 1
+	
+	def restart_main(self):
+		self.remove_widget(self.lose)
+		self.state = SnookRoot.STATE_MENU
+		self.menu.size = Window.size
+		self.add_widget(self.menu)
+		
+	#def get_help(self):
+	#	self.state = SnookeRoot.STATE_HELP
+	#	self.help = SnookHelpMenu()
 		
 	def restart_game(self):
+		if self.state == SnookRoot.STATE_LOSE:
+			self.remove_widget(self.lose)
+		else:
+			self.remove_widget(self.help)
 		self.game.restart_game()
-		self.remove_widget(self.lose)
 		self.add_widget(self.game)
 		
 	def end_game(self):
@@ -291,5 +319,5 @@ class SnookApp(App):
 
 Factory.register("SnookGame", SnookGame)
 		
-if __name__ == '__main__':
+if __name__ in ('__android__', '__main__'):
 	SnookApp().run()
