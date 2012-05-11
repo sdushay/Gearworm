@@ -10,23 +10,25 @@ from kivy.lang import Builder
 from kivy.uix.button import Button
 from kivy.core.audio import SoundLoader
 from functools import partial
-from kivy.properties import NumericProperty
+from kivy.properties import NumericProperty, ObjectProperty
 from kivy.uix.label import Label
 from kivy.animation import Animation
 import math
 
 class Music(Widget):
-	sound = None
+	sound = SoundLoader.load('assets/heartbeat.ogg')
 	def start(self):
-		if self.sound is None:
-			self.sound = SoundLoader.load("music.ogg")
-			self.sound.volume = 0.8
+		self.sound.bind(on_stop=self.sound_replay)
+		self.sound.play()
+		
+	def sound_replay(self, instance):
+		if self.sound.status != 'play':
 			self.sound.play()
-			self.sound.on_stop = self.sound.play
-		else:
-			self.sound.volume = 0.8
+			
 	def stop(self):
+		self.sound.unbind(on_stop=self.sound_replay)
 		self.sound.volume = 0
+		#self.sound.stop()
 
 class Screw(Widget):
 	def setup(self):
@@ -113,8 +115,6 @@ class SnookGame(Widget):
 		self.allgears.append(gear)
 		self.add_widget(gear)
 		self.snake.setup()
-		print speed_time
-		print screw_time
 		Clock.schedule_interval(self.snake.update, speed_time)
 		Clock.schedule_interval(self.create_gear, 1)
 		Clock.schedule_interval(self.check_collisions, 1.0 / 60.0)
@@ -155,13 +155,13 @@ class SnookGame(Widget):
 						self.snake.gears.pop(len(self.snake.gears) - 1)
 						self.snake.positions.pop(len(self.snake.positions) - 1)
 						self.snake.positions.pop(len(self.snake.positions) - 1)
-						self.score += 50
+						self.score += 5 * base_score
 					else:
 						self.snake.gears.append(gear)
 						self.snake.add_widget(gear)
 						pos = self.snake.positions[len(self.snake.positions) - 1]
 						self.snake.positions.append(pos)
-						self.score += 10
+						self.score += base_score
 				else:
 					self.snake.gears.append(gear)
 					self.snake.add_widget(gear)
@@ -266,13 +266,20 @@ class SnookHelpMenu(Widget):
 	pass
 	
 class SnookSettingMenu(Widget):
-	toggle = "On"
+	toggle = ObjectProperty("Off")
+	def change(self):
+		if self.toggle == "Off":
+			self.toggle = "On"
+		else:
+			self.toggle = "Off"
+		print self.toggle
 		
 class SnookRoot(Widget):
-	global fade_time, speed_time, screw_time
+	global fade_time, speed_time, screw_time, base_score
 	fade_time = 5
 	screw_time = 8
 	speed_time = .1
+	base_score = 10
 	STATE_MENU = 0
 	STATE_PLAY = 1
 	STATE_LOSE = 2
@@ -280,14 +287,27 @@ class SnookRoot(Widget):
 	STATE_SETTINGS = 4
 	help = Widget()
 	menu_visited = 0
+	settings = None
+	sound = SoundLoader.load('assets/heartbeat.ogg')
+	def start_music(self):
+		self.sound = SoundLoader.load('assets/heartbeat.ogg')
+		self.sound.bind(on_stop=self.sound_replay)
+		self.sound.play()
+		
+	def sound_replay(self, instance):
+		if self.sound.status != 'play':
+			self.sound.play()
+			
+	def stop_music(self):
+		self.sound.unbind(on_stop=self.sound_replay)
+		self.sound.volume = 0
+		self.sound.stop()
 	
 	def start(self):
 		self.state = SnookRoot.STATE_MENU
 		self.menu = SnookMenu()
 		self.menu.size = Window.size
 		self.add_widget(self.menu)
-		self.music = Music()
-		self.music.start()
 		
 	def start_game(self):
 		self.state = SnookRoot.STATE_PLAY
@@ -317,8 +337,9 @@ class SnookRoot(Widget):
 	
 	def get_settings(self):
 		self.state = SnookRoot.STATE_SETTINGS
-		self.settings = SnookSettingMenu()
-		self.settings.size = Window.size
+		if self.settings is None:
+			self.settings = SnookSettingMenu()
+			self.settings.size = Window.size
 		self.remove_widget(self.menu)
 		self.add_widget(self.settings)
 	
@@ -351,21 +372,30 @@ class SnookRoot(Widget):
 		self.add_widget(self.lose)
 		
 	def set_diff(self, diff):
-		global fade_time, screw_time, speed_time
+		global fade_time, screw_time, speed_time, base_score
 		if diff == "easy":
 			fade_time = 10
 			screw_time = 16
 			speed_time = .2
+			base_score = 5
 		elif diff == "med":
 			fade_time = 5
 			screw_time = 8
 			speed_time = .1
+			base_score = 10
 		else:
 			fade_time = 3
 			screw_time = 5
 			speed_time = .05
+			base_score = 20
 	
-	def
+	def toggle_music(self):
+		if self.settings.toggle == "Off":
+			self.settings.change()
+			self.start_music()
+		else:
+			self.settings.change()
+			self.stop_music()
 			
 class SnookApp(App):
 	icon = 'assets/icon.png'
@@ -376,6 +406,7 @@ class SnookApp(App):
 		return root
 
 Factory.register("SnookGame", SnookGame)
+Factory.register("SnookSettingMenu", SnookSettingMenu)
 		
 if __name__ in ('__android__', '__main__'):
 	SnookApp().run()
